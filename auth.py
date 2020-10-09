@@ -1,12 +1,10 @@
 from __future__ import print_function
-import datetime
+
 import pickle
 import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-import arrow
-import config
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
@@ -36,30 +34,7 @@ def main():
             pickle.dump(creds, token)
 
     service = build('calendar', 'v3', credentials=creds)
-
-    # Call the Calendar API
-    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    query = str(input("名前を入力（空欄で環境変数を読み取る）：") or config.myname)
-    print('Getting the upcoming 40 events')
-    events_result = service.events().list(calendarId=config.calendarId, timeMin=now,
-                                          maxResults=40, singleEvents=True,
-                                          orderBy='startTime',
-                                          q=query).execute()
-    events = events_result.get('items', [])
-
-    if not events:
-        print('No upcoming events found.')
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        start_time = arrow.get(start).format(fmt='HH:mm')
-        start_date = arrow.get(start).format(fmt='YY年MM月DD日')
-        start_day = arrow.get(start).format(fmt='DD日')
-        shift = {'09:00': '早🔵', '12:00': '中🟣', '15:00': '遅🔴️'}
-        # print(start, event['summary'])
-        if start_time in shift:
-            print(event['summary'], start_date, start_time, shift[start_time],start_day)
-        else:
-            print(event['summary'], start_date, start_time, '他⚪️',start_day)
+    return service
 
 
 if __name__ == '__main__':
