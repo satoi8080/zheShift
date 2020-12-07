@@ -3,7 +3,7 @@ arrow==0.17.0
 async-timeout==3.0.1
 attrs==20.3.0
 cachetools==4.1.1
-certifi==2020.11.8
+certifi==2020.12.5
 chardet==3.0.4
 google-api-core==1.23.0
 google-api-python-client==1.12.8
