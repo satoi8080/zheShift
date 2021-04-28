@@ -2,7 +2,7 @@ aiohttp==3.7.4.post0
 arrow==1.0.3
 async-timeout==3.0.1
 attrs==20.3.0
-cachetools==4.2.1
+cachetools==4.2.2
 certifi==2020.12.5
 chardet==4.0.0
 google-api-core==1.26.3
