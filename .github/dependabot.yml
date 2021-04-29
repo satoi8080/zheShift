@@ -1,0 +1,39 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "20:00"
+  open-pull-requests-limit: 10
+  assignees:
+  - satoi8080
+  ignore:
+  - dependency-name: google-auth
+    versions:
+    - 1.26.0
+    - 1.27.1
+    - 1.28.0
+    - 1.28.1
+  - dependency-name: google-api-core
+    versions:
+    - 1.26.1
+    - 1.26.2
+  - dependency-name: google-auth-oauthlib
+    versions:
+    - 0.4.3
+  - dependency-name: protobuf
+    versions:
+    - 3.15.0
+    - 3.15.1
+    - 3.15.2
+    - 3.15.3
+    - 3.15.4
+    - 3.15.5
+  - dependency-name: arrow
+    versions:
+    - 1.0.0
+    - 1.0.2
+  - dependency-name: httplib2
+    versions:
+    - 0.19.0
