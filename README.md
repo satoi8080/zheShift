@@ -13,4 +13,5 @@ Calendar Settings -> Integrate calendar -> Calendar ID
 CALENDAR_ID=****
 MY_NAME=****
 EXPORT_CALENDAR_ID=****
+TIMEZONE='Asia/Tokyo'
 ```
