@@ -1,5 +1,4 @@
 import arrow
-import datetime
 import auth as calendar
 
 import config
@@ -7,7 +6,6 @@ import config
 
 def shift_list():
     service = calendar.main()
-    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
     arrow_now = arrow.now(tz=config.timezone)
     next_month_start_utc = arrow_now.shift(months=1).replace(day=1, hour=0, minute=0, second=0, microsecond=0).to('UTC')
     next_month_start_utc_iso = next_month_start_utc.datetime.isoformat()
