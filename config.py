@@ -1,5 +1,7 @@
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
-calendarId = os.getenv('CALENDAR_ID')
-myname=os.getenv('MY_NAME')
+calendar_ID = os.getenv('CALENDAR_ID')
+export_calendar_ID = os.getenv('EXPORT_CALENDAR_ID')
+myname = os.getenv('MY_NAME')

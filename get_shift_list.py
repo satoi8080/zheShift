@@ -10,9 +10,10 @@ def shift_list():
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
     # query = str(input("名前を入力（空欄で環境変数を読み取る）：") or config.myname)
     query = config.myname
-    print('Getting the upcoming at most 100 events')
-    events_result = service.events().list(calendarId=config.calendarId, timeMin=now,
-                                          maxResults=100, singleEvents=True,
+    results_length = 100
+    print('Getting the upcoming at most ' + str(results_length) + ' events')
+    events_result = service.events().list(calendarId=config.calendar_ID, timeMin=now,
+                                          maxResults=results_length, singleEvents=True,
                                           orderBy='startTime',
                                           q=query).execute()
     events = events_result.get('items', [])
