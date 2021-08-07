@@ -8,9 +8,8 @@ import config
 def tomorrow():
     service = calendar.main()
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    # query = str(input("名前を入力（空欄で環境変数を読み取る）：") or config.myname)
     query = config.myname
-    events_result = service.events().list(calendarId=config.calendarId, timeMin=now,
+    events_result = service.events().list(calendarId=config.calendar_ID, timeMin=now,
                                           maxResults=1, singleEvents=True,
                                           orderBy='startTime',
                                           q=query).execute()
