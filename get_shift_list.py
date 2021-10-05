@@ -12,7 +12,7 @@ def shift_list():
     query = config.myname
     results_length = 100
     print('Getting the upcoming at most ' + str(results_length) + ' events')
-    events_result = service.events().list(calendarId=config.calendar_ID, timeMin=now,
+    events_result = service.events().list(calendarId=config.read_calendar_ID, timeMin=now,
                                           maxResults=results_length, singleEvents=True,
                                           orderBy='startTime',
                                           q=query).execute()
