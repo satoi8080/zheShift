@@ -8,7 +8,9 @@ def shift_list():
     service = calendar.main()
     arrow_now = arrow.now(tz=config.timezone)
     next_month_start_utc = arrow_now.shift(months=1).replace(day=1, hour=0, minute=0, second=0, microsecond=0).to('UTC')
+    # Beginning of Next Month
     next_month_start_utc_iso = next_month_start_utc.datetime.isoformat()
+    # End of Next Month
     next_month_end_utc = arrow_now.shift(months=2).replace(day=1, hour=0, minute=0, second=0, microsecond=0).to('UTC')
     next_month_end_utc_iso = next_month_end_utc.datetime.isoformat()
 
