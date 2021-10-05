@@ -9,7 +9,7 @@ def tomorrow():
     service = calendar.main()
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
     query = config.myname
-    events_result = service.events().list(calendarId=config.calendar_ID, timeMin=now,
+    events_result = service.events().list(calendarId=config.read_calendar_ID, timeMin=now,
                                           maxResults=1, singleEvents=True,
                                           orderBy='startTime',
                                           q=query).execute()
