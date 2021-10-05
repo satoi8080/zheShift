@@ -38,7 +38,7 @@ def shift_list():
         print(event['summary'], start_time, event_shift, start_day, start_date)
         if event['summary']:
             event_body = {
-                'summary': event['summary'],
+                'summary': event['summary'] + shift,
                 'start': event['start'],
                 'end': event['end']
             }
