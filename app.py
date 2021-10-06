@@ -66,15 +66,18 @@ def get_shift_list(clear_old_export: bool = True,
     :return: If no error, returns 0
     """
     service = auth()
+
     arrow_now = arrow.now(tz=config.timezone)
+
     next_month_start_utc = arrow_now.shift(months=month_offset).replace(day=1, hour=0, minute=0, second=0,
                                                                         microsecond=0).to('UTC')
     # Beginning of Next Month
     next_month_start_utc_iso = next_month_start_utc.datetime.isoformat()
 
-    # Beginning of the Month after Next
     next_month_end_utc = arrow_now.shift(months=month_offset + 1).replace(day=1, hour=0, minute=0, second=0,
                                                                           microsecond=0).to('UTC')
+
+    # Beginning of the Month after Next
     next_month_end_utc_iso = next_month_end_utc.datetime.isoformat()
 
     # query = str(input("Input event title keyword：") or config.myname)
@@ -110,12 +113,16 @@ def get_shift_list(clear_old_export: bool = True,
             print('No upcoming events found.')
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
+
             start_time = arrow.get(start).format(fmt='HH:mm')
             start_date = arrow.get(start).format(fmt='MM月YY年')
             start_day = arrow.get(start).format(fmt='DD日')
+
             shift = {'09:00': '早🔵', '12:00': '中🟣', '15:00': '遅🔴️'}
+
             event_shift = shift[start_time] if start_time in shift else '他⚪️'
             event_details = event['summary'] + start_time + event_shift + start_day + start_date
+
             if add_new_export:
                 event_body = {
                     'summary': event['summary'] + ' - ' + event_shift,
@@ -124,6 +131,7 @@ def get_shift_list(clear_old_export: bool = True,
                 }
                 service.events().insert(calendarId=config.export_calendar_ID, body=event_body).execute()
                 print('Imported: ' + event_details)
+
         return 0
 
     if clear_old_export:
