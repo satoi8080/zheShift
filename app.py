@@ -12,7 +12,7 @@ import arrow
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 
-def main():
+def auth():
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
     """
@@ -53,84 +53,89 @@ def main():
     return service
 
 
-def shift_list_print(result_lenth: int = 100):
-    service = main()
-    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    # query = str(input("名前を入力（空欄で環境変数を読み取る）：") or config.myname)
-    query = config.queryname
-    print('Getting the upcoming at most ' + str(result_lenth) + ' events')
-    events_result = service.events().list(calendarId=config.import_calendar_ID, timeMin=now,
-                                          maxResults=result_lenth, singleEvents=True,
-                                          orderBy='startTime',
-                                          q=query).execute()
-    events = events_result.get('items', [])
+def get_shift_list(clear_old_export: bool = True,
+                   add_new_export: bool = True,
+                   month_offset: int = 1,
+                   max_results: int = 100):
+    """
 
-    if not events:
-        print('No upcoming events found.')
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        start_time = arrow.get(start).format(fmt='HH:mm')
-        start_date = arrow.get(start).format(fmt='MM月YY年')
-        start_day = arrow.get(start).format(fmt='DD日')
-        shift = {'09:00': '早🔵', '12:00': '中🟣', '15:00': '遅🔴️'}
-        event_shift = shift[start_time] if start_time in shift else '他⚪️'
-        print(event['summary'], start_time, event_shift, start_day, start_date)
-
-
-def shift_list_export(clear_old_export: bool = True,
-                      clear_old_export_only: bool = False,
-                      max_results: int = 100):
-    service = main()
+    :param clear_old_export: If True, old export events will be cleaered
+    :param add_new_export: If True, new exportable events will be exported
+    :param month_offset: Normally 1 for next month, 0 for this month, -1 for last month
+    :param max_results: Max events to export, normally no more than 31 I think, but still set default to 100
+    :return: If no error, returns 0
+    """
+    service = auth()
     arrow_now = arrow.now(tz=config.timezone)
-    next_month_start_utc = arrow_now.shift(months=1).replace(day=1, hour=0, minute=0, second=0, microsecond=0).to('UTC')
+    next_month_start_utc = arrow_now.shift(months=month_offset).replace(day=1, hour=0, minute=0, second=0,
+                                                                        microsecond=0).to('UTC')
     # Beginning of Next Month
     next_month_start_utc_iso = next_month_start_utc.datetime.isoformat()
+
     # Beginning of the Month after Next
-    next_month_end_utc = arrow_now.shift(months=2).replace(day=1, hour=0, minute=0, second=0, microsecond=0).to('UTC')
+    next_month_end_utc = arrow_now.shift(months=month_offset + 1).replace(day=1, hour=0, minute=0, second=0,
+                                                                          microsecond=0).to('UTC')
     next_month_end_utc_iso = next_month_end_utc.datetime.isoformat()
 
-    # query = str(input("名前を入力（空欄で環境変数を読み取る）：") or config.myname)
+    # query = str(input("Input event title keyword：") or config.myname)
     query = config.queryname
+
+    def do_clear_old_export():
+        if clear_old_export:
+            print('Getting the old exported ' + str(max_results) + ' events')
+            old_events_result = service.events().list(calendarId=config.export_calendar_ID,
+                                                      timeMin=next_month_start_utc_iso,
+                                                      timeMax=next_month_end_utc_iso,
+                                                      maxResults=max_results, singleEvents=True,
+                                                      orderBy='startTime',
+                                                      q=query).execute()
+            old_events = old_events_result.get('items', [])
+            if not old_events:
+                print('No events found.')
+            for old_event in old_events:
+                service.events().delete(calendarId=config.export_calendar_ID, eventId=old_event['id']).execute()
+                print('Deleted old event ' + old_event['summary'])
+        return 0
+
+    def do_add_new_export():
+        print('Getting the ' + str(max_results) + ' events to import')
+        events_result = service.events().list(calendarId=config.import_calendar_ID,
+                                              timeMin=next_month_start_utc_iso,
+                                              timeMax=next_month_end_utc_iso,
+                                              maxResults=max_results, singleEvents=True,
+                                              orderBy='startTime',
+                                              q=query).execute()
+        events = events_result.get('items', [])
+        if not events:
+            print('No upcoming events found.')
+        for event in events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            start_time = arrow.get(start).format(fmt='HH:mm')
+            start_date = arrow.get(start).format(fmt='MM月YY年')
+            start_day = arrow.get(start).format(fmt='DD日')
+            shift = {'09:00': '早🔵', '12:00': '中🟣', '15:00': '遅🔴️'}
+            event_shift = shift[start_time] if start_time in shift else '他⚪️'
+            event_details = event['summary'] + start_time + event_shift + start_day + start_date
+            if add_new_export:
+                event_body = {
+                    'summary': event['summary'] + ' - ' + event_shift,
+                    'start': event['start'],
+                    'end': event['end']
+                }
+                service.events().insert(calendarId=config.export_calendar_ID, body=event_body).execute()
+                print('Imported: ' + event_details)
+        return 0
+
     if clear_old_export:
-        old_events_result = service.events().list(calendarId=config.export_calendar_ID,
-                                                  timeMin=next_month_start_utc_iso,
-                                                  timeMax=next_month_end_utc_iso,
-                                                  maxResults=max_results, singleEvents=True,
-                                                  orderBy='startTime',
-                                                  q=query).execute()
-        old_events = old_events_result.get('items', [])
-        for old_event in old_events:
-            service.events().delete(calendarId=config.export_calendar_ID, eventId=old_event['id']).execute()
-            print('Deleting old event' + old_event['summary'])
-    print('Getting the upcoming at most ' + str(max_results) + ' events')
-    events_result = service.events().list(calendarId=config.import_calendar_ID,
-                                          timeMin=next_month_start_utc_iso,
-                                          timeMax=next_month_end_utc_iso,
-                                          maxResults=max_results, singleEvents=True,
-                                          orderBy='startTime',
-                                          q=query).execute()
-    events = events_result.get('items', [])
-    if not events:
-        print('No upcoming events found.')
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        start_time = arrow.get(start).format(fmt='HH:mm')
-        start_date = arrow.get(start).format(fmt='MM月YY年')
-        start_day = arrow.get(start).format(fmt='DD日')
-        shift = {'09:00': '早🔵', '12:00': '中🟣', '15:00': '遅🔴️'}
-        event_shift = shift[start_time] if start_time in shift else '他⚪️'
-        event_details = event['summary'] + start_time + event_shift + start_day + start_date
-        if event['summary'] and not clear_old_export_only:
-            event_body = {
-                'summary': event['summary'] + ' - ' + event_shift,
-                'start': event['start'],
-                'end': event['end']
-            }
-            service.events().insert(calendarId=config.export_calendar_ID, body=event_body).execute()
-            print('Added' + event_details)
+        do_clear_old_export()
+    if add_new_export:
+        do_add_new_export()
+
     return 0
 
 
 if __name__ == '__main__':
-    main()
-    shift_list_export(clear_old_export_only=True)
+    auth()
+    get_shift_list(clear_old_export=True,
+                   add_new_export=True,
+                   month_offset=1)
