@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-read_calendar_ID = os.getenv('CALENDAR_ID')
+import_calendar_ID = os.getenv('IMPORT_CALENDAR_ID')
 export_calendar_ID = os.getenv('EXPORT_CALENDAR_ID')
-myname = os.getenv('MY_NAME')
+queryname = os.getenv('QUERY_NAME')
 timezone = os.getenv('TIMEZONE')
