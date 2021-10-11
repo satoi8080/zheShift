@@ -177,9 +177,9 @@ def get_shift_list(clear_old_export: bool = True,
             if start_date in holidays_date_list and start_time != '15:00':
                 count_holiday_non_late_shift += 1
 
-        return {'Late_shift': count_late_shift,
-                'Sunday_shift': count_sunday_shift,
-                'Holiday_shift': count_holiday_non_late_shift}
+        return print({'Late_shift': count_late_shift,
+                 'Sunday_shift': count_sunday_shift,
+                 'Holiday_shift': count_holiday_non_late_shift})
 
     if clear_old_export:
         do_clear_old_export()
@@ -194,4 +194,4 @@ if __name__ == '__main__':
     auth()
     get_shift_list(clear_old_export=False,
                    add_new_export=False,
-                   month_offset=1)
+                   month_offset=0)
