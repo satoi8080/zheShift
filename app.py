@@ -1,4 +1,3 @@
-import datetime
 import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -69,16 +68,16 @@ def get_shift_list(clear_old_export: bool = True,
 
     arrow_now = arrow.now(tz=config.timezone)
 
-    next_month_start_utc = arrow_now.shift(months=month_offset).replace(day=1, hour=0, minute=0, second=0,
-                                                                        microsecond=0).to('UTC')
+    month_start_utc = arrow_now.shift(months=month_offset).replace(day=1, hour=0, minute=0, second=0,
+                                                                   microsecond=0).to('UTC')
     # Beginning of Next Month
-    next_month_start_utc_iso = next_month_start_utc.datetime.isoformat()
+    month_start_utc_iso = month_start_utc.datetime.isoformat()
 
-    next_month_end_utc = arrow_now.shift(months=month_offset + 1).replace(day=1, hour=0, minute=0, second=0,
-                                                                          microsecond=0).to('UTC')
+    month_end_utc = arrow_now.shift(months=month_offset + 1).replace(day=1, hour=0, minute=0, second=0,
+                                                                     microsecond=0).to('UTC')
 
     # Beginning of the Month after Next
-    next_month_end_utc_iso = next_month_end_utc.datetime.isoformat()
+    month_end_utc_iso = month_end_utc.datetime.isoformat()
 
     # query = str(input("Input event title keyword：") or config.myname)
     query = config.queryname
@@ -87,8 +86,8 @@ def get_shift_list(clear_old_export: bool = True,
         if clear_old_export:
             print('Getting the old exported ' + str(max_results) + ' events')
             old_events_result = service.events().list(calendarId=config.export_calendar_ID,
-                                                      timeMin=next_month_start_utc_iso,
-                                                      timeMax=next_month_end_utc_iso,
+                                                      timeMin=month_start_utc_iso,
+                                                      timeMax=month_end_utc_iso,
                                                       maxResults=max_results, singleEvents=True,
                                                       orderBy='startTime',
                                                       q=query).execute()
@@ -103,8 +102,8 @@ def get_shift_list(clear_old_export: bool = True,
     def do_add_new_export():
         print('Getting the ' + str(max_results) + ' events to import')
         events_result = service.events().list(calendarId=config.import_calendar_ID,
-                                              timeMin=next_month_start_utc_iso,
-                                              timeMax=next_month_end_utc_iso,
+                                              timeMin=month_start_utc_iso,
+                                              timeMax=month_end_utc_iso,
                                               maxResults=max_results, singleEvents=True,
                                               orderBy='startTime',
                                               q=query).execute()
@@ -115,13 +114,13 @@ def get_shift_list(clear_old_export: bool = True,
             start = event['start'].get('dateTime', event['start'].get('date'))
 
             start_time = arrow.get(start).format(fmt='HH:mm')
-            start_date = arrow.get(start).format(fmt='MM月YY年')
-            start_day = arrow.get(start).format(fmt='DD日')
+            start_date = arrow.get(start).format(fmt='DD日MM月YY年')
 
             shift = {'09:00': '早🔵', '12:00': '中🟣', '15:00': '遅🔴️'}
 
             event_shift = shift[start_time] if start_time in shift else '他⚪️'
-            event_details = event['summary'] + start_time + event_shift + start_day + start_date
+            event_details = event['summary'] + start_time + event_shift + start_date
+            print('Read: ' + event_details)
 
             if add_new_export:
                 event_body = {
@@ -130,20 +129,69 @@ def get_shift_list(clear_old_export: bool = True,
                     'end': event['end']
                 }
                 service.events().insert(calendarId=config.export_calendar_ID, body=event_body).execute()
-                print('Imported: ' + event_details)
-
+                print('Exported: ' + event_details)
         return 0
+
+    def count_late_sunday_and_holiday():
+        count_late_shift = 0
+        count_sunday_shift = 0
+        count_holiday_non_late_shift = 0
+        print('Getting the ' + str(max_results) + ' events to import')
+        events_result = service.events().list(calendarId=config.import_calendar_ID,
+                                              timeMin=month_start_utc_iso,
+                                              timeMax=month_end_utc_iso,
+                                              maxResults=max_results, singleEvents=True,
+                                              orderBy='startTime',
+                                              q=query).execute()
+        holiday_result = service.events().list(calendarId='ja.japanese.official#holiday@group.v.calendar.google.com',
+                                               timeMin=month_start_utc_iso,
+                                               timeMax=month_end_utc_iso,
+                                               maxResults=max_results, singleEvents=True,
+                                               orderBy='startTime', ).execute()
+        events = events_result.get('items', [])
+        holidays = holiday_result.get('items', [])
+
+        if not events:
+            print('No upcoming events found.')
+        if not holidays:
+            print('No upcoming holidays found.')
+
+        holidays_date_list = []
+
+        for holiday in holidays:
+            holiday_start = holiday['start'].get('dateTime', holiday['start'].get('date'))
+            holliday_start_date = arrow.get(holiday_start).format(fmt='YYYYMMDD')
+            holidays_date_list.append(holliday_start_date)
+
+        for event in events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            start_date = arrow.get(start).format(fmt='YYYYMMDD')
+            start_time = arrow.get(start).format(fmt='HH:mm')
+            start_weekday = arrow.get(start).isoweekday()
+            # isoweekday() Monday is 1 and Sunday is 7
+
+            if start_time == '15:00':
+                count_late_shift += 1
+            if start_weekday == 7 and start_time != '15:00':
+                count_sunday_shift += 1
+            if start_date in holidays_date_list and start_time != '15:00':
+                count_holiday_non_late_shift += 1
+
+        return {'Late_shift': count_late_shift,
+                'Sunday_shift': count_sunday_shift,
+                'Holiday_shift': count_holiday_non_late_shift}
 
     if clear_old_export:
         do_clear_old_export()
     if add_new_export:
         do_add_new_export()
+    count_late_sunday_and_holiday()
 
     return 0
 
 
 if __name__ == '__main__':
     auth()
-    get_shift_list(clear_old_export=True,
-                   add_new_export=True,
+    get_shift_list(clear_old_export=False,
+                   add_new_export=False,
                    month_offset=1)
