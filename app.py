@@ -1,4 +1,5 @@
 import os.path
+from distutils.util import strtobool
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -192,6 +193,6 @@ def get_shift_list(clear_old_export: bool = True,
 
 if __name__ == '__main__':
     auth()
-    get_shift_list(clear_old_export=False,
-                   add_new_export=False,
-                   month_offset=0)
+    get_shift_list(clear_old_export=strtobool(os.getenv('CLEAR_OLD_EXPORT')),
+                   add_new_export=strtobool(os.getenv('ADD_NEW_EXPORT')),
+                   month_offset=int(os.getenv('MONTH_OFFSET')))

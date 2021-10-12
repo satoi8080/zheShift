@@ -1,17 +1,33 @@
 # my-shift
 
-* Modified from https://github.com/gsuitedevs/python-samples/blob/master/calendar/quickstart/quickstart.py
+* Part of the source code is modified from [Quickstarts overview](https://github.com/gsuitedevs/python-samples/blob/master/calendar/quickstart/quickstart.py)
 
-* So you could basically go through the example, but you'll need to install extra packages with `pip install -r requirements.txt`
+## Instructions:
 
-* Get calendar ID in 
+* [Create a project](https://developers.google.com/workspace/guides/create-project)
+
+
+* [Create OAuth credentials](https://developers.google.com/workspace/guides/create-credentials)
+
+
+* Get import and export calendar ID in 
+
 ```
 Calendar Settings -> Integrate calendar -> Calendar ID
 ```
+
 * Create a `.env` and set up as following
 ```
-CALENDAR_ID=****
-MY_NAME=****
-EXPORT_CALENDAR_ID=****
-TIMEZONE='Asia/Tokyo'
+IMPORT_CALENDAR_ID=
+EXPORT_CALENDAR_ID=
+TIMEZONE = 'Asia/Tokyo'
+CLEAR_OLD_EXPORT = False
+ADD_NEW_EXPORT = False
+MONTH_OFFSET = 0
+QUERY_NAME = 張
+```
+
+* Run with docker-compose
+```
+docker-compose up --build --force-recreate -d
 ```
