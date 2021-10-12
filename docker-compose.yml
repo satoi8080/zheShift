@@ -1,0 +1,7 @@
+version: '3'
+services:
+  ms:
+    build: .
+    restart: "no"
+    volumes:
+      - .:/usr/src/app
