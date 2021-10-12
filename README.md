@@ -10,6 +10,9 @@
 * [Create OAuth credentials](https://developers.google.com/workspace/guides/create-credentials)
 
 
+* Rename downloaded credentials file to `credentials.json`
+
+
 * Get import and export calendar ID in 
 
 ```
