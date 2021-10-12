@@ -10,7 +10,7 @@
 * [Create OAuth credentials](https://developers.google.com/workspace/guides/create-credentials)
 
 
-* Rename downloaded credentials file to `credentials.json`
+* Rename downloaded credentials file to `credentials.json` and put it into root directory of this project
 
 
 * Get import and export calendar ID in 
@@ -19,7 +19,7 @@
 Calendar Settings -> Integrate calendar -> Calendar ID
 ```
 
-* Create a `.env` and set up as following
+* Create a `.env` in root directory of this project and set up as following
 ```
 IMPORT_CALENDAR_ID=
 EXPORT_CALENDAR_ID=
