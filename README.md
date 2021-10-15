@@ -30,7 +30,20 @@ MONTH_OFFSET = 0
 QUERY_NAME = 張
 ```
 
-* Run with docker-compose
-```
-docker-compose up --build --force-recreate -d
-```
+### Run with docker-compose
+
+`docker-compose up --build --force-recreate -d`
+
+### Run with Python
+
+* Create venv
+
+`python3 -m venv ./venv`
+
+* Activate venv 
+
+`source ./venv/bin/activate`
+
+* RUn
+
+`python3 app.py`
