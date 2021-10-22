@@ -44,6 +44,6 @@ QUERY_NAME = 張
 
 `source ./venv/bin/activate`
 
-* RUn
+* Run
 
 `python3 app.py`
