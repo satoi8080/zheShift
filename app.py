@@ -25,8 +25,6 @@ def auth():
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 'credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
@@ -179,8 +177,8 @@ def get_shift_list(clear_old_export: bool = True,
                 count_holiday_non_late_shift += 1
 
         return print({'Late_shift': count_late_shift,
-                 'Sunday_shift': count_sunday_shift,
-                 'Holiday_shift': count_holiday_non_late_shift})
+                      'Sunday_Non_Late_shift': count_sunday_shift,
+                      'Holiday_Non_Late_shift': count_holiday_non_late_shift})
 
     if clear_old_export:
         do_clear_old_export()
