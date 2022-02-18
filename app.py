@@ -191,6 +191,7 @@ def get_shift_list(clear_old_export: bool = True,
 
 if __name__ == '__main__':
     auth()
-    get_shift_list(clear_old_export=strtobool(os.getenv('CLEAR_OLD_EXPORT')),
-                   add_new_export=strtobool(os.getenv('ADD_NEW_EXPORT')),
-                   month_offset=int(os.getenv('MONTH_OFFSET')))
+    get_shift_list(clear_old_export=config.clear_old_export,
+                   add_new_export=config.add_new_export,
+                   month_offset=config.month_offset
+                   )
