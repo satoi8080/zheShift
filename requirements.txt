@@ -1,5 +1,5 @@
 aiohttp>=3.7.4
-arrow==1.2.1
+arrow==1.2.2
 async-timeout==4.0.2
 attrs==21.4.0
 cachetools==5.0.0
