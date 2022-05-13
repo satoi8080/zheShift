@@ -1,4 +1,5 @@
 import os.path
+from datetime import timedelta
 from distutils.util import strtobool
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -131,7 +132,7 @@ def get_shift_list(clear_old_export: bool = True,
                 print('Exported: ' + event_details)
         return 0
 
-    def count_late_sunday_and_holiday():
+    def count_late_sunday_and_holiday_and_error_check():
         count_late_shift = 0
         count_sunday_shift = 0
         count_holiday_non_late_shift = 0
@@ -162,18 +163,33 @@ def get_shift_list(clear_old_export: bool = True,
             holliday_start_date = arrow.get(holiday_start).format(fmt='YYYYMMDD')
             holidays_date_list.append(holliday_start_date)
 
-        for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            start_date = arrow.get(start).format(fmt='YYYYMMDD')
-            start_time = arrow.get(start).format(fmt='HH:mm')
-            start_weekday = arrow.get(start).isoweekday()
+        for event_index in range(len(events)):
+            event = events[event_index]
+            next_event = events[event_index + 1] if event_index + 1 < len(events) else None
+
+            event_start = event['start'].get('dateTime', event['start'].get('date'))
+            next_event_start = next_event['start'].get('dateTime',
+                                                       next_event['start'].get('date')) if next_event else None
+            event_start_date_str = arrow.get(event_start).format(fmt='YYYYMMDD')
+            event_start_date_obj = arrow.get(event_start).date()
+            next_event_start_date_str = arrow.get(next_event_start).format(fmt='YYYYMMDD') if next_event_start else None
+            next_event_start_date_obj = arrow.get(next_event_start).date() if next_event_start else None
+            event_start_time = arrow.get(event_start).format(fmt='HH:mm')
+            next_event_start_time = arrow.get(next_event_start).format(fmt='HH:mm') if next_event_start else None
+            event_start_weekday = arrow.get(event_start).isoweekday()
+            next_event_start_weekday = arrow.get(next_event_start).isoweekday() if next_event_start else None
+
+            if event_start_time == '15:00' and next_event_start_time == '09:00':
+                if next_event_start_date_obj == event_start_date_obj + timedelta(days=1):
+                    print('遅早 found between ' + event_start_date_str + ' and ' + next_event_start_date_str)
+
             # isoweekday() Monday is 1 and Sunday is 7
 
-            if start_time == '15:00':
+            if event_start_time == '15:00':
                 count_late_shift += 1
-            if start_weekday == 7 and start_time != '15:00':
+            if event_start_weekday == 7 and event_start_time != '15:00':
                 count_sunday_shift += 1
-            if start_date in holidays_date_list and start_time != '15:00':
+            if event_start_date_str in holidays_date_list and event_start_time != '15:00':
                 count_holiday_non_late_shift += 1
 
         return print({'Late_shift': count_late_shift,
@@ -184,7 +200,7 @@ def get_shift_list(clear_old_export: bool = True,
         do_clear_old_export()
     if add_new_export:
         do_add_new_export()
-    count_late_sunday_and_holiday()
+    count_late_sunday_and_holiday_and_error_check()
 
     return 0
 
