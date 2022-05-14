@@ -160,8 +160,8 @@ def get_shift_list(clear_old_export: bool = True,
 
         for holiday in holidays:
             holiday_start = holiday['start'].get('dateTime', holiday['start'].get('date'))
-            holliday_start_date = arrow.get(holiday_start).format(fmt='YYYYMMDD')
-            holidays_date_list.append(holliday_start_date)
+            holiday_start_date = arrow.get(holiday_start).format(fmt='YYYYMMDD')
+            holidays_date_list.append(holiday_start_date)
 
         for event_index in range(len(events)):
             event = events[event_index]
