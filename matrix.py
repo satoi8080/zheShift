@@ -23,7 +23,7 @@ def get_true_monthly_date_span(year: int, month: int, iso_start_of_week: int,
                                begin_and_end_only: bool = False) -> list:
     begin_of_the_month = arrow.get(f'{year}-{month}-01')
     end_of_the_month = begin_of_the_month.shift(months=1).shift(days=-1)
-    # Get the date span range extended days according to the beginning of week given
+    # Get the date range of extended days according to the beginning of week given
     # With the beginning of the week in ISO which is 1~7, we can get the first day of the week
     true_begin = begin_of_the_month.shift(days=-6)
     for date in list(arrow.Arrow.range('day', true_begin.datetime, begin_of_the_month.datetime))[::-1]:
@@ -47,4 +47,5 @@ if __name__ == '__main__':
     for _year in [2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030]:
         for _month in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]:
             print(f'{_year}-{_month}')
-            print(get_true_monthly_date_span(year=_year, month=_month, iso_start_of_week=1))
+            print(get_true_monthly_date_span(year=_year, month=_month,
+                                             iso_start_of_week=7, begin_and_end_only=False))
