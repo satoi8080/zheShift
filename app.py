@@ -187,13 +187,13 @@ def get_shift_list(clear_old_export: bool = True,
 
             if event_start_time == '15:00':
                 count_late_shift += 1
-            if event_start_weekday == 7 and event_start_time != '15:00':
-                count_sunday_shift += 1
-            if event_start_date_str in holidays_date_list and event_start_time != '15:00':
+            if event_start_weekday == 7 and event_start_time in ['09:00','12:00']:
+                count_sunday_non_late_shift += 1
+            if event_start_date_str in holidays_date_list and event_start_time in ['09:00','12:00']:
                 count_holiday_non_late_shift += 1
 
         return print({'Late_shift': count_late_shift,
-                      'Sunday_Non_Late_shift': count_sunday_shift,
+                      'Sunday_Non_Late_shift': count_sunday_non_late_shift,
                       'Holiday_Non_Late_shift': count_holiday_non_late_shift})
 
     if clear_old_export:
