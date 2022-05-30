@@ -134,7 +134,7 @@ def get_shift_list(clear_old_export: bool = True,
 
     def count_late_sunday_and_holiday_and_error_check():
         count_late_shift = 0
-        count_sunday_shift = 0
+        count_sunday_non_late_shift = 0
         count_holiday_non_late_shift = 0
         print('Getting the ' + str(max_results) + ' events to import')
         events_result = service.events().list(calendarId=config.import_calendar_ID,
