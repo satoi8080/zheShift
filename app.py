@@ -134,6 +134,7 @@ def get_shift_list(clear_old_export: bool = True,
         return 0
 
     def count_late_sunday_and_holiday_and_error_check():
+        count_mid_shift = 0
         count_late_shift = 0
         count_sunday_non_late_shift = 0
         count_holiday_non_late_shift = 0
@@ -189,8 +190,9 @@ def get_shift_list(clear_old_export: bool = True,
                     print('遅中 found between ' + event_start_date_str + ' and ' + next_event_start_date_str)
 
             # isoweekday() Monday is 1 and Sunday is 7
-
-            if event_start_time == '15:00':
+            if event_start_time == config.MID_START_TIME:
+                count_mid_shift += 1
+            if event_start_time == config.LATE_START_TIME:
                 count_late_shift += 1
             if event_start_weekday == 7 and event_start_time in [config.EARLY_START_TIME,
                                                                  config.LATE_START_TIME]:
@@ -199,7 +201,8 @@ def get_shift_list(clear_old_export: bool = True,
                                                                                    config.LATE_START_TIME]:
                 count_holiday_non_late_shift += 1
 
-        return print({'Late_shift': count_late_shift,
+        return print({'Mid_shift': count_mid_shift,
+                      'Late_shift': count_late_shift,
                       'Sunday_Non_Late_shift': count_sunday_non_late_shift,
                       'Holiday_Non_Late_shift': count_holiday_non_late_shift})
 
