@@ -71,11 +71,12 @@ def get_shift_list(clear_old_export: bool = True,
     month_start_utc = arrow_now.shift(months=month_offset).replace(day=1, hour=0, minute=0, second=0,
                                                                    microsecond=0).to('UTC')
     # Beginning of Next Month
+    print('From: ', month_start_utc.format('YYYY-MM-DD HH:mm:ss'), 'UTC')
     month_start_utc_iso = month_start_utc.datetime.isoformat()
 
     month_end_utc = arrow_now.shift(months=month_offset + 1).replace(day=1, hour=0, minute=0, second=0,
                                                                      microsecond=0).to('UTC')
-
+    print('To:   ', month_end_utc.format('YYYY-MM-DD HH:mm:ss'), 'UTC')
     # Beginning of the Month after Next
     month_end_utc_iso = month_end_utc.datetime.isoformat()
 
@@ -179,17 +180,23 @@ def get_shift_list(clear_old_export: bool = True,
             event_start_weekday = arrow.get(event_start).isoweekday()
             next_event_start_weekday = arrow.get(next_event_start).isoweekday() if next_event_start else None
 
-            if event_start_time == '15:00' and next_event_start_time == '09:00':
+            if event_start_time == config.LATE_START_TIME and next_event_start_time == config.EARLY_START_TIME:
                 if next_event_start_date_obj == event_start_date_obj + timedelta(days=1):
                     print('遅早 found between ' + event_start_date_str + ' and ' + next_event_start_date_str)
+
+            if event_start_time == config.MID_START_TIME and next_event_start_time == config.EARLY_START_TIME:
+                if next_event_start_date_obj == event_start_date_obj + timedelta(days=1):
+                    print('遅中 found between ' + event_start_date_str + ' and ' + next_event_start_date_str)
 
             # isoweekday() Monday is 1 and Sunday is 7
 
             if event_start_time == '15:00':
                 count_late_shift += 1
-            if event_start_weekday == 7 and event_start_time in ['09:00','12:00']:
+            if event_start_weekday == 7 and event_start_time in [config.EARLY_START_TIME,
+                                                                 config.LATE_START_TIME]:
                 count_sunday_non_late_shift += 1
-            if event_start_date_str in holidays_date_list and event_start_time in ['09:00','12:00']:
+            if event_start_date_str in holidays_date_list and event_start_time in [config.EARLY_START_TIME,
+                                                                                   config.LATE_START_TIME]:
                 count_holiday_non_late_shift += 1
 
         return print({'Late_shift': count_late_shift,
