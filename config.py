@@ -12,6 +12,8 @@ clear_old_export = strtobool(os.getenv('CLEAR_OLD_EXPORT'))
 add_new_export = strtobool(os.getenv('ADD_NEW_EXPORT'))
 month_offset = int(os.getenv('MONTH_OFFSET'))
 
+EIGHT_HOUR_SHIFT = strtobool(os.getenv('EIGHT_HOUR_SHIFT'))
+
 EARLY_START_TIME = '09:00'
 MID_START_TIME = '12:00'
-LATE_START_TIME = '15:00'
+LATE_START_TIME = '12:00' if EIGHT_HOUR_SHIFT else '15:00'

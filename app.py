@@ -1,6 +1,7 @@
 import os.path
 from datetime import timedelta
-from distutils.util import strtobool
+
+import rich.table
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -8,6 +9,7 @@ from google.oauth2.credentials import Credentials
 
 import config
 import arrow
+from rich import print
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
@@ -34,21 +36,6 @@ def auth():
             token.write(creds.to_json())
 
     service = build('calendar', 'v3', credentials=creds)
-
-    # # Call the Calendar API
-    # now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    # print('Getting the upcoming 10 events')
-    # events_result = service.events().list(calendarId='primary', timeMin=now,
-    #                                       maxResults=10, singleEvents=True,
-    #                                       orderBy='startTime').execute()
-    # events = events_result.get('items', [])
-    #
-    # if not events:
-    #     print('No upcoming events found.')
-    # for event in events:
-    #     start = event['start'].get('dateTime', event['start'].get('date'))
-    #     print(start, event['summary'])
-
     return service
 
 
@@ -134,10 +121,12 @@ def get_shift_list(clear_old_export: bool = True,
         return 0
 
     def count_late_sunday_and_holiday_and_error_check():
+        count_total_shift = 0
+        count_early_shift = 0
         count_mid_shift = 0
         count_late_shift = 0
-        count_sunday_non_late_shift = 0
-        count_holiday_non_late_shift = 0
+        count_non_sun_nor_holiday_shift = 0
+        count_sun_or_holiday_shift = 0
         print('Getting the ' + str(max_results) + ' events to import')
         events_result = service.events().list(calendarId=config.import_calendar_ID,
                                               timeMin=month_start_utc_iso,
@@ -178,33 +167,42 @@ def get_shift_list(clear_old_export: bool = True,
             next_event_start_date_obj = arrow.get(next_event_start).date() if next_event_start else None
             event_start_time = arrow.get(event_start).format(fmt='HH:mm')
             next_event_start_time = arrow.get(next_event_start).format(fmt='HH:mm') if next_event_start else None
-            event_start_weekday = arrow.get(event_start).isoweekday()
+            event_start_weekday = arrow.get(event_start).isoweekday() if next_event_start else None
             next_event_start_weekday = arrow.get(next_event_start).isoweekday() if next_event_start else None
 
             if event_start_time == config.LATE_START_TIME and next_event_start_time == config.EARLY_START_TIME:
                 if next_event_start_date_obj == event_start_date_obj + timedelta(days=1):
                     print('遅早 found between ' + event_start_date_str + ' and ' + next_event_start_date_str)
 
-            if event_start_time == config.MID_START_TIME and next_event_start_time == config.EARLY_START_TIME:
-                if next_event_start_date_obj == event_start_date_obj + timedelta(days=1):
-                    print('遅中 found between ' + event_start_date_str + ' and ' + next_event_start_date_str)
-
             # isoweekday() Monday is 1 and Sunday is 7
+            count_total_shift += 1
+
+            if event_start_time == config.EARLY_START_TIME:
+                count_early_shift += 1
             if event_start_time == config.MID_START_TIME:
                 count_mid_shift += 1
             if event_start_time == config.LATE_START_TIME:
                 count_late_shift += 1
-            if event_start_weekday == 7 and event_start_time in [config.EARLY_START_TIME,
-                                                                 config.LATE_START_TIME]:
-                count_sunday_non_late_shift += 1
-            if event_start_date_str in holidays_date_list and event_start_time in [config.EARLY_START_TIME,
-                                                                                   config.LATE_START_TIME]:
-                count_holiday_non_late_shift += 1
 
-        return print({'Mid_shift': count_mid_shift,
-                      'Late_shift': count_late_shift,
-                      'Sunday_Non_Late_shift': count_sunday_non_late_shift,
-                      'Holiday_Non_Late_shift': count_holiday_non_late_shift})
+            is_late = event_start_time == config.LATE_START_TIME
+            is_weekday_or_sat = (event_start_weekday != 7) and (event_start_date_str not in holidays_date_list)
+            is_sunday_or_holiday = (event_start_weekday == 7) or (event_start_date_str in holidays_date_list)
+            # Duplicates !is_weekday_or_sat though, for convenience of future change
+            if is_late and is_weekday_or_sat:
+                count_non_sun_nor_holiday_shift += 1
+            if is_sunday_or_holiday:
+                count_sun_or_holiday_shift = + 1
+        table = rich.table.Table(title='Shift Summary')
+        table.add_column('Type')
+        table.add_column('Count')
+        table.add_row('EARLY', str(count_early_shift))
+        table.add_row('MID (Late for 8Hour)', str(count_mid_shift))
+        table.add_row('LATE', str(count_late_shift))
+        table.add_row('Monday~Saturday Late', str(count_non_sun_nor_holiday_shift))
+        table.add_row('Sunday or Holiday All', str(count_sun_or_holiday_shift))
+        return print('\n',
+                     table
+                     )
 
     if clear_old_export:
         do_clear_old_export()
