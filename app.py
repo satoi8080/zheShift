@@ -105,6 +105,8 @@ def get_shift_list(clear_old_export: bool = True,
             start_date = arrow.get(start).format(fmt='DD日MM月YY年')
 
             shift = {'09:00': '早🟦', '12:00': '中🟪', '15:00': '遅🟥'}
+            if config.EIGHT_HOUR_SHIFT:
+                shift = {'09:00': '早🟦', '12:00': '遅🟥'}
 
             event_shift = shift[start_time] if start_time in shift else '他⚪️'
             event_details = event['summary'] + start_time + event_shift + start_date
