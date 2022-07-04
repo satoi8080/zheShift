@@ -129,7 +129,7 @@ def get_shift_list(clear_old_export: bool = True,
         count_late_shift = 0
         count_non_sun_nor_holiday_shift = 0
         count_sun_or_holiday_shift = 0
-        print('Getting the ' + str(max_results) + ' events to import')
+        print('Getting the ' + str(max_results) + ' events for stat and error check')
         events_result = service.events().list(calendarId=config.import_calendar_ID,
                                               timeMin=month_start_utc_iso,
                                               timeMax=month_end_utc_iso,
