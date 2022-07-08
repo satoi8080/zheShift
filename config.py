@@ -17,3 +17,5 @@ EIGHT_HOUR_SHIFT = strtobool(os.getenv('EIGHT_HOUR_SHIFT'))
 EARLY_START_TIME = '09:00'
 MID_START_TIME = '12:00'
 LATE_START_TIME = '12:00' if EIGHT_HOUR_SHIFT else '15:00'
+
+export_calendar_URL = os.getenv('EXPORT_CALENDAR_URL')

@@ -1,5 +1,7 @@
 import os.path
+import webbrowser
 from datetime import timedelta
+from distutils.util import strtobool
 
 import rich.table
 from googleapiclient.discovery import build
@@ -27,10 +29,9 @@ def auth():
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
+        flow = InstalledAppFlow.from_client_secrets_file(
+            'credentials.json', SCOPES)
+        creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
@@ -198,9 +199,9 @@ def get_shift_list(clear_old_export: bool = True,
         table.add_column('Type')
         table.add_column('Count')
         table.add_row('EARLY', str(count_early_shift))
-        table.add_row('MID (Late for 8Hour)', str(count_mid_shift))
+        table.add_row('MID (Late for 8 hour)', str(count_mid_shift))
         table.add_row('LATE', str(count_late_shift))
-        table.add_row('Monday~Saturday Late', str(count_non_sun_nor_holiday_shift))
+        table.add_row('Monday ~ Saturday Late', str(count_non_sun_nor_holiday_shift))
         table.add_row('Sunday or Holiday All', str(count_sun_or_holiday_shift))
         return print('\n',
                      table
@@ -217,7 +218,12 @@ def get_shift_list(clear_old_export: bool = True,
 
 if __name__ == '__main__':
     auth()
-    get_shift_list(clear_old_export=config.clear_old_export,
-                   add_new_export=config.add_new_export,
-                   month_offset=config.month_offset
+    # get_shift_list(clear_old_export=config.clear_old_export,
+    #                add_new_export=config.add_new_export,
+    #                month_offset=config.month_offset
+    #                )
+    get_shift_list(clear_old_export=bool(strtobool(input('Clear Old Events? 1 for True and 0 for false: '))),
+                   add_new_export=bool(strtobool(input('Add New Events? 1 for True and 0 for false: '))),
+                   month_offset=int(input('Month offset like -1, 0, 1: '))
                    )
+    webbrowser.open_new_tab(config.export_calendar_URL)
