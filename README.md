@@ -34,6 +34,8 @@ QUERY_NAME = 鈴木
 
 `docker-compose up --build --force-recreate -d`
 
+Not really working
+
 ### Run with Python
 
 * Create venv
