@@ -194,7 +194,8 @@ def get_shift_list(clear_old_export: bool = True,
             if is_late and is_weekday_or_sat:
                 count_non_sun_nor_holiday_shift += 1
             if is_sunday_or_holiday:
-                count_sun_or_holiday_shift = + 1
+                print('Sunday or holiday found: ' + event_start_date_str)
+                count_sun_or_holiday_shift += 1
         table = rich.table.Table(title='Shift Summary')
         table.add_column('Type')
         table.add_column('Count')
