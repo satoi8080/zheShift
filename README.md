@@ -27,7 +27,7 @@ TIMEZONE = 'Asia/Tokyo'
 CLEAR_OLD_EXPORT = False
 ADD_NEW_EXPORT = False
 MONTH_OFFSET = 0
-QUERY_NAME = 張
+QUERY_NAME = 鈴木
 ```
 
 ### Run with docker-compose
