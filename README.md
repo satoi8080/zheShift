@@ -23,6 +23,8 @@ Calendar Settings -> Integrate calendar -> Calendar ID
 ```
 IMPORT_CALENDAR_ID=
 EXPORT_CALENDAR_ID=
+EXPORT_CALENDAR_URL=
+# EXPORT_CALENDAR_URL will be opened as soon as calendar process is finished
 TIMEZONE = 'Asia/Tokyo'
 CLEAR_OLD_EXPORT = False
 ADD_NEW_EXPORT = False
