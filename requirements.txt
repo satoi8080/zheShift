@@ -28,5 +28,5 @@ six==1.16.0
 uritemplate==4.1.1
 urllib3==1.26.11
 yarl==1.8.1
-pandas==1.4.4
+pandas==1.5.0
 rich~=12.5.1
