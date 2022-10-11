@@ -2,13 +2,12 @@ import os.path
 import webbrowser
 from datetime import timedelta
 from distutils.util import strtobool
-
 import rich.table
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-
+# ------------------------------------------------
 import config
 import arrow
 from rich import print
@@ -69,7 +68,7 @@ def get_shift_list(clear_old_export: bool = True,
     month_end_utc_iso = month_end_utc.datetime.isoformat()
 
     # query = str(input("Input event title keyword：") or config.myname)
-    query = config.queryname
+    query = config.query_name
 
     def do_clear_old_export():
         if clear_old_export:
