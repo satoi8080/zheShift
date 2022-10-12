@@ -28,9 +28,12 @@ def auth():
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
-        flow = InstalledAppFlow.from_client_secrets_file(
-            'credentials.json', SCOPES)
-        creds = flow.run_local_server(port=0)
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                'credentials.json', SCOPES)
+            creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
@@ -130,24 +133,29 @@ def get_shift_list(clear_old_export: bool = True,
         count_non_sun_nor_holiday_shift = 0
         count_sun_or_holiday_shift = 0
         print('Getting the ' + str(max_results) + ' events for stat and error check')
+
         events_result = service.events().list(calendarId=config.import_calendar_ID,
                                               timeMin=month_start_utc_iso,
                                               timeMax=month_end_utc_iso,
                                               maxResults=max_results, singleEvents=True,
                                               orderBy='startTime',
-                                              q=query).execute()
+                                              q=query
+                                              ).execute()
+
         holiday_result = service.events().list(calendarId='ja.japanese.official#holiday@group.v.calendar.google.com',
                                                timeMin=month_start_utc_iso,
                                                timeMax=month_end_utc_iso,
                                                maxResults=max_results, singleEvents=True,
-                                               orderBy='startTime', ).execute()
+                                               orderBy='startTime',
+                                               ).execute()
+
         events = events_result.get('items', [])
         holidays = holiday_result.get('items', [])
 
         if not events:
-            print('No upcoming events found.')
+            print('No upcoming Events found.')
         if not holidays:
-            print('No upcoming holidays found.')
+            print('No upcoming Holidays found.')
 
         holidays_date_list = []
 
@@ -218,12 +226,9 @@ def get_shift_list(clear_old_export: bool = True,
 
 if __name__ == '__main__':
     auth()
-    # get_shift_list(clear_old_export=config.clear_old_export,
-    #                add_new_export=config.add_new_export,
-    #                month_offset=config.month_offset
-    #                )
-    get_shift_list(clear_old_export=bool(strtobool(input('Clear Old Events? 1 for True and 0 for false: '))),
-                   add_new_export=bool(strtobool(input('Add New Events? 1 for True and 0 for false: '))),
-                   month_offset=int(input('Month offset like -1, 0, 1: '))
-                   )
+    get_shift_list(
+        clear_old_export=bool(strtobool(input('Clear Events? 1 for True or 0 for false: <default: 1> ') or '1')),
+        add_new_export=bool(strtobool(input('Add New Events? 1 for True or 0 for false: <default: 1> ') or '1')),
+        month_offset=int(input('Month offset like -1, 0, 1: <default: 1> ') or '1')
+    )
     webbrowser.open_new_tab(config.export_calendar_URL)
