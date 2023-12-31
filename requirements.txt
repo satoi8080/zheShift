@@ -4,7 +4,7 @@ google-api-python-client==2.111.0
 google-auth==2.25.2
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.0
-googleapis-common-protos==1.60.0
+googleapis-common-protos==1.62.0
 python-dotenv==1.0.0
 requests==2.31.0
 pandas~=2.1.4
