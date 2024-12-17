@@ -7,5 +7,5 @@ google-auth-oauthlib==1.2.0
 googleapis-common-protos==1.66.0
 python-dotenv==1.0.1
 requests==2.32.3
-pandas~=2.2.1
+pandas~=2.2.3
 rich~=13.9.4
